@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         },
         |c:&[u8]| output.extend_from_slice(c)
     );
-    process(input, &mut rewriter)?;
+    process(input, rewriter)?;
 
     // Stream was ended twice.
     // rewriter.end()?;
@@ -38,13 +38,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         output: &mut output,
     };
 
-    process(input, &mut escaper);
+    process(input, escaper)?;
     println!("output: escaped {}", std::str::from_utf8(&output[..]).unwrap());
 
     Ok(())
 }
 
-fn process(input: &str, processor: &mut dyn Processor) -> Result<(), Box<dyn Error>> {
+fn process<T : Processor>(input: &str, mut processor: T) -> Result<(), Box<dyn Error>> {
     processor.write(input.as_bytes())?;
     processor.end()?;
     Ok(())
