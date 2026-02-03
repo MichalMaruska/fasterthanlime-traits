@@ -1,5 +1,7 @@
 use lol_html::{element, HtmlRewriter, Settings, OutputSink};
 use std::error::Error;
+use html_escape::encode_safe_to_writer;
+use std::io;
 
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -22,9 +24,21 @@ fn main() -> Result<(), Box<dyn Error>> {
     process(input, &mut rewriter)?;
 
     // rewriter.end()?;
-
+    let output = std::str::from_utf8(&output).unwrap();
     println!("input: {input}");
-    println!("output: {}", std::str::from_utf8(&output).unwrap());
+    println!("output: {}", output);
+
+
+    //
+    let input = &output[..];
+    let mut output = vec![];
+    let mut escaper = Escaper {
+        output: &mut output,
+    };
+
+    process(input, &mut escaper);
+    println!("output: escaped {}", std::str::from_utf8(&output[..]).unwrap());
+
     Ok(())
 }
 
@@ -52,4 +66,23 @@ impl<'h,O: OutputSink> Processor for HtmlRewriter<'h, O> {
     fn end(&mut self) -> Result<(), Box<dyn Error>> {
         HtmlRewriter::end(self).map_err(Into::into)
     }
+}
+
+
+struct Escaper<W: io::Write> {
+    output: W,
+}
+
+impl<W: io::Write> Processor for Escaper<W> {
+
+    fn write(&mut self, chunk: &[u8]) -> Result<(), Box<dyn Error>> {
+        // fixme: chunk might end inside multibyte, so no UTF8
+        encode_safe_to_writer(std::str::from_utf8(chunk)?,
+                              &mut self.output).map_err(Into::into)
+    }
+
+    fn end(&mut self) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
+
 }
