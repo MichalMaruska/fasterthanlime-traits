@@ -76,6 +76,16 @@ trait Processor {
 }
 
 
+impl<T: Processor> Processor for  Box<T> {
+    fn write(&mut self, chunk: &[u8]) -> Result<(), Box<dyn Error>> {
+        T::write(self, chunk)
+    }
+
+    fn end(self) -> Result<(), Box<dyn Error>> {
+        T::end(*self)
+    }
+}
+
 impl<'h,O: OutputSink> Processor for HtmlRewriter<'h, O> {
 
     fn write(&mut self, chunk: &[u8]) -> Result<(), Box<dyn Error>> {
