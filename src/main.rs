@@ -23,7 +23,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
     process(input, &mut rewriter)?;
 
+    // Stream was ended twice.
     // rewriter.end()?;
+
     let output = std::str::from_utf8(&output).unwrap();
     println!("input: {input}");
     println!("output: {}", output);
@@ -45,7 +47,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn process(input: &str, processor: &mut dyn Processor) -> Result<(), Box<dyn Error>> {
     processor.write(input.as_bytes())?;
     processor.end()?;
-
     Ok(())
 }
 
