@@ -8,7 +8,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut output = vec![];
     let input = include_str!("input.html");
 
-    let mut rewriter = HtmlRewriter::new(
+    let rewriter = HtmlRewriter::new(
         Settings {
             element_content_handlers:
             vec![
@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     //
     let input = &output[..];
     let mut output = vec![];
-    let mut escaper = Escaper {
+    let escaper = Escaper {
         output: &mut output,
     };
 
