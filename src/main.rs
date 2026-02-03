@@ -3,24 +3,44 @@ use std::error::Error;
 use html_escape::encode_safe_to_writer;
 use std::io;
 
+enum ProcessorType {
+    LazyLoading,
+    HtmlEscape,
+}
+
+impl ProcessorType {
+    fn build<'w, W: io::Write + 'w>(&self, mut output: W) -> Box<dyn Processor + 'w> {
+        match self {
+            ProcessorType::LazyLoading => Box::new(
+                HtmlRewriter::new(
+                    Settings {
+                        element_content_handlers:
+                        vec![
+                            element!("img", |el| {
+                                el.set_attribute("loading", "lazy")?;
+                                Ok(())
+                            })
+                        ],
+                        ..Default::default()
+                    },
+                    |c:&[u8]| output.write_all(c).unwrap(),
+                )
+            ),
+
+            ProcessorType::HtmlEscape => Box::new(
+                Escaper {
+                    output: &mut output,
+                })
+        }
+    }
+}
+
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut output = vec![];
     let input = include_str!("input.html");
 
-    let rewriter = HtmlRewriter::new(
-        Settings {
-            element_content_handlers:
-            vec![
-                element!("img", |el| {
-                    el.set_attribute("loading", "lazy")?;
-                    Ok(())
-                })
-            ],
-            ..Default::default()
-        },
-        |c:&[u8]| output.extend_from_slice(c)
-    );
+    let rewriter = ProcessorType::LazyLoading.build(&mut output);
     process(input, rewriter)?;
 
     // Stream was ended twice.
@@ -34,9 +54,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     //
     let input = &output[..];
     let mut output = vec![];
-    let escaper = Escaper {
-        output: &mut output,
-    };
+    let escaper =  ProcessorType::HtmlEscape.build(&mut output);
 
     process(input, escaper)?;
     println!("output: escaped {}", std::str::from_utf8(&output[..]).unwrap());
