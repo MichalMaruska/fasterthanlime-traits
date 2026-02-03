@@ -8,7 +8,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut output = vec![];
     let input = include_str!("input.html");
 
-    let mut rewriter = HtmlRewriter::try_new(
+    let mut rewriter = HtmlRewriter::new(
         Settings {
             element_content_handlers:
             vec![
@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             ..Default::default()
         },
         |c:&[u8]| output.extend_from_slice(c)
-    )?;
+    );
     process(input, &mut rewriter)?;
 
     // rewriter.end()?;

@@ -5,5 +5,5 @@ edition = "2024"
 
 [dependencies]
 html-escape = "0.2.13"
-lol_html = "0.2.0"
+lol_html = "0.3.0"
 # lol_html = "2.7.1"
