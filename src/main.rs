@@ -23,13 +23,13 @@ impl ProcessorType {
                         ],
                         ..Default::default()
                     },
-                    |c:&[u8]| output.write_all(c).unwrap(),
+                    move |c:&[u8]| output.write_all(c).unwrap(),
                 )
             ),
 
             ProcessorType::HtmlEscape => Box::new(
                 Escaper {
-                    output: &mut output,
+                    output,
                 })
         }
     }
