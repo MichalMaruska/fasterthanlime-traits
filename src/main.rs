@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     )?;
     process(input, &mut rewriter)?;
 
-    rewriter.end()?;
+    // rewriter.end()?;
 
     println!("input: {input}");
     println!("output: {}", std::str::from_utf8(&output).unwrap());
