@@ -53,7 +53,7 @@ fn process(input: &str, processor: &mut dyn Processor) -> Result<(), Box<dyn Err
 
 trait Processor {
     fn write(&mut self, chunk: &[u8]) -> Result<(), Box<dyn Error>>;
-    fn end(&mut self) -> Result<(), Box<dyn Error>>;
+    fn end(self) -> Result<(), Box<dyn Error>>;
 }
 
 
@@ -63,7 +63,7 @@ impl<'h,O: OutputSink> Processor for HtmlRewriter<'h, O> {
         HtmlRewriter::write(self, chunk).map_err(Into::into)
     }
 
-    fn end(&mut self) -> Result<(), Box<dyn Error>> {
+    fn end(self) -> Result<(), Box<dyn Error>> {
         HtmlRewriter::end(self).map_err(Into::into)
     }
 }
@@ -81,7 +81,7 @@ impl<W: io::Write> Processor for Escaper<W> {
                               &mut self.output).map_err(Into::into)
     }
 
-    fn end(&mut self) -> Result<(), Box<dyn Error>> {
+    fn end(self) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
 
