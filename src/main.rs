@@ -8,10 +8,15 @@ enum ProcessorType {
     HtmlEscape,
 }
 
-impl ProcessorType {
-    fn build<'w, W: io::Write + 'w>(&self, mut output: W) -> Box<dyn Processor + 'w> {
+enum ProcessorImpl<'h, W: io::Write, O: OutputSink> {
+    LazyLoading(HtmlRewriter<'h, O>),
+    HtmlEscape(Escaper<W>),
+}
+
+impl<'h, O: OutputSink> ProcessorType {
+    fn build<'w, W: io::Write + 'w>(&self, mut output: W) -> ProcessorImpl<'h, W, O> {
         match self {
-            ProcessorType::LazyLoading => Box::new(
+            ProcessorType::LazyLoading => ProcessorImpl::LazyLoading(
                 HtmlRewriter::new(
                     Settings {
                         element_content_handlers:
@@ -27,7 +32,7 @@ impl ProcessorType {
                 )
             ),
 
-            ProcessorType::HtmlEscape => Box::new(
+            ProcessorType::HtmlEscape => ProcessorImpl::HtmlEscape(
                 Escaper {
                     output,
                 })
