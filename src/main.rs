@@ -125,14 +125,15 @@ impl<W: io::Write> Processor for ProcessorImpl<W> {
 
     fn write(&mut self, chunk: &[u8]) -> Result<(), Box<dyn Error>> {
         match self {
-            ProcessorImpl::LazyLoading(p) => p.write(chunk),
+            // we need to convert the Error type.
+            ProcessorImpl::LazyLoading(p) => p.write(chunk).map_err(Into::into),
             ProcessorImpl::HtmlEscape(p) => p.write(chunk),
         }
     }
 
     fn end(self) -> Result<(), Box<dyn Error>> {
         match self {
-            ProcessorImpl::LazyLoading(p) => p.end(),
+            ProcessorImpl::LazyLoading(p) => p.end().map_err(Into::into),
             ProcessorImpl::HtmlEscape(p) => p.end(),
         }
     }
