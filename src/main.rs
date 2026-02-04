@@ -25,7 +25,7 @@ enum ProcessorImpl<W: io::Write> {
 }
 
 impl ProcessorType {
-    fn build<'w, W: io::Write + 'w>(&self, mut output: W) -> ProcessorImpl<W> {
+    fn build<'w, W: io::Write + 'w>(&self, output: W) -> ProcessorImpl<W> {
         match self {
             ProcessorType::LazyLoading => ProcessorImpl::LazyLoading(
                 HtmlRewriter::new(
