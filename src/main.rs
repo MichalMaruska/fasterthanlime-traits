@@ -8,6 +8,17 @@ enum ProcessorType {
     HtmlEscape,
 }
 
+struct WriterOutputSink<W> {
+    writer: W,
+}
+
+impl<W: io::Write> OutputSink for  WriterOutputSink<W> {
+    fn handle_chunk(&mut self, chunk: &[u8]) {
+        // might panic
+        self.writer.write_all(chunk).unwrap()
+    }
+}
+
 enum ProcessorImpl<'h, W: io::Write, O: OutputSink> {
     LazyLoading(HtmlRewriter<'h, O>),
     HtmlEscape(Escaper<W>),
@@ -29,7 +40,7 @@ impl<'h, O: OutputSink> ProcessorType {
                         ],
                         ..Default::default()
                     },
-                    |c:&[u8]| output.write_all(c).unwrap(),
+                    WriterOutputSink { writer: output},
                 )
             ),
 
