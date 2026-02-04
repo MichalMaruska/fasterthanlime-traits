@@ -9,7 +9,7 @@ enum ProcessorType {
 }
 
 impl ProcessorType {
-    fn build<'w, W: io::Write + 'w>(&self, mut output: W) -> Box<dyn Processor + 'w> {
+    fn build<'w, W: io::Write>(&self, output: &'w mut W) -> Box<dyn Processor + 'w> {
         match self {
             ProcessorType::LazyLoading => Box::new(
                 HtmlRewriter::new(
@@ -23,13 +23,13 @@ impl ProcessorType {
                         ],
                         ..Default::default()
                     },
-                    move |c:&[u8]| output.write_all(c).unwrap(),
+                    |c:&[u8]| output.write_all(c).unwrap(),
                 )
             ),
 
             ProcessorType::HtmlEscape => Box::new(
                 Escaper {
-                    output,
+                    output: output,
                 })
         }
     }
