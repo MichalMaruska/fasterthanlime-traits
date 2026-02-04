@@ -20,7 +20,7 @@ impl<W: io::Write> OutputSink for  WriterOutputSink<W> {
 }
 
 enum ProcessorImpl<W: io::Write> {
-    LazyLoading(HtmlRewriter<'static, O>),
+    LazyLoading(HtmlRewriter<'static, WriterOutputSink<W>>),
     HtmlEscape(Escaper<W>),
 }
 
