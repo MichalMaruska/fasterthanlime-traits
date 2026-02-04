@@ -30,26 +30,22 @@ enum ProcessorImpl<W: io::Write> {
 impl ProcessorType {
     fn build<'w, W: io::Write>(&self, output: &'w mut W) -> ProcessorImpl<W> {
         match self {
-            ProcessorType::LazyLoading => ProcessorImpl::LazyLoading(
-                HtmlRewriter::new(
-                    Settings {
-                        element_content_handlers:
-                        vec![
-                            element!("img", |el| {
-                                el.set_attribute("loading", "lazy")?;
-                                Ok(())
-                            })
-                        ],
-                        ..Default::default()
-                    },
-                    WriterOutputSink { writer: output},
-                )
-            ),
-
-            ProcessorType::HtmlEscape => ProcessorImpl::HtmlEscape(
-                Escaper {
-                    output: output,
-                })
+            ProcessorType::LazyLoading => HtmlRewriter::new(
+                Settings {
+                    element_content_handlers:
+                    vec![
+                        element!("img", |el| {
+                            el.set_attribute("loading", "lazy")?;
+                            Ok(())
+                        })
+                    ],
+                    ..Default::default()
+                },
+                WriterOutputSink { writer: output},
+            ).into(),
+            ProcessorType::HtmlEscape => Escaper {
+                output: output,
+            }.into()
         }
     }
 }
