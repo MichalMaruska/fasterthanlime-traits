@@ -2,6 +2,8 @@ use lol_html::{element, HtmlRewriter, Settings, OutputSink};
 use std::error::Error;
 use html_escape::encode_safe_to_writer;
 use std::io;
+use enum_dispatch::enum_dispatch;
+
 
 enum ProcessorType {
     LazyLoading,
@@ -19,6 +21,7 @@ impl<W: io::Write> OutputSink for  WriterOutputSink<W> {
     }
 }
 
+#[enum_dispatch(Processor)]
 enum ProcessorImpl<W: io::Write> {
     LazyLoading(HtmlRewriter<'static, WriterOutputSink<W>>),
     HtmlEscape(Escaper<W>),
@@ -85,7 +88,7 @@ fn process<P: Processor>(input: &str, mut processor: P) -> Result<(), Box<dyn Er
 }
 
 
-
+#[enum_dispatch]
 trait Processor {
     fn write(&mut self, chunk: &[u8]) -> Result<(), Box<dyn Error>>;
     fn end(self) -> Result<(), Box<dyn Error>>;
@@ -118,26 +121,5 @@ impl<W: io::Write> Processor for Escaper<W> {
 
     fn end(self) -> Result<(), Box<dyn Error>> {
         Ok(())
-    }
-}
-
-impl<W: io::Write> Processor for ProcessorImpl<W> {
-
-    fn write(&mut self, chunk: &[u8]) -> Result<(), Box<dyn Error>> {
-        match self {
-            // we need to convert the Error type.
-            // HtmlRewriter ....so which .end() is taken? -- the one inherent, not Trait.
-            ProcessorImpl::LazyLoading(p) => p.write(chunk).map_err(Into::into),
-            ProcessorImpl::HtmlEscape(p) => p.write(chunk),
-        }
-    }
-
-    fn end(self) -> Result<(), Box<dyn Error>> {
-        match self {
-            // HtmlRewriter ....so which .end() is taken?
-            ProcessorImpl::LazyLoading(p) => p.end().map_err(Into::into),
-            // so p is Escaper and end() is ...
-            ProcessorImpl::HtmlEscape(p) => p.end(),
-        }
     }
 }
