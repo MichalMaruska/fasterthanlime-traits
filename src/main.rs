@@ -19,13 +19,13 @@ impl<W: io::Write> OutputSink for  WriterOutputSink<W> {
     }
 }
 
-enum ProcessorImpl<'h, W: io::Write, O: OutputSink> {
-    LazyLoading(HtmlRewriter<'h, O>),
+enum ProcessorImpl<W: io::Write, O: OutputSink> {
+    LazyLoading(HtmlRewriter<'static, O>),
     HtmlEscape(Escaper<W>),
 }
 
-impl<'h, O: OutputSink> ProcessorType {
-    fn build<'w, W: io::Write + 'w>(&self, mut output: W) -> ProcessorImpl<'h, W, O> {
+impl<O: OutputSink> ProcessorType {
+    fn build<'w, W: io::Write + 'w>(&self, mut output: W) -> ProcessorImpl<W, O> {
         match self {
             ProcessorType::LazyLoading => ProcessorImpl::LazyLoading(
                 HtmlRewriter::new(
