@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+enum_dispatch = "0.3.13"
 html-escape = "0.2.13"
 lol_html = "0.3.0"
 # lol_html = "2.7.1"
