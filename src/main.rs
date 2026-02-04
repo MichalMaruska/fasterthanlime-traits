@@ -62,7 +62,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn process<T : Processor>(input: &str, mut processor: T) -> Result<(), Box<dyn Error>> {
+fn process(input: &str, mut processor: Box<dyn Processor>) -> Result<(), Box<dyn Error>> {
     processor.write(input.as_bytes())?;
     processor.end()?;
     Ok(())
