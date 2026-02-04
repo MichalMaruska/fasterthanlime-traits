@@ -119,5 +119,21 @@ impl<W: io::Write> Processor for Escaper<W> {
     fn end(self) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
+}
 
+impl<W: io::Write> Processor for ProcessorImpl<W> {
+
+    fn write(&mut self, chunk: &[u8]) -> Result<(), Box<dyn Error>> {
+        match self {
+            ProcessorImpl::LazyLoading(p) => p.write(chunk),
+            ProcessorImpl::HtmlEscape(p) => p.write(chunk),
+        }
+    }
+
+    fn end(self) -> Result<(), Box<dyn Error>> {
+        match self {
+            ProcessorImpl::LazyLoading(p) => p.end(),
+            ProcessorImpl::HtmlEscape(p) => p.end(),
+        }
+    }
 }
