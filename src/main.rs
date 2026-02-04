@@ -126,6 +126,7 @@ impl<W: io::Write> Processor for ProcessorImpl<W> {
     fn write(&mut self, chunk: &[u8]) -> Result<(), Box<dyn Error>> {
         match self {
             // we need to convert the Error type.
+            // HtmlRewriter ....so which .end() is taken? -- the one inherent, not Trait.
             ProcessorImpl::LazyLoading(p) => p.write(chunk).map_err(Into::into),
             ProcessorImpl::HtmlEscape(p) => p.write(chunk),
         }
@@ -133,7 +134,9 @@ impl<W: io::Write> Processor for ProcessorImpl<W> {
 
     fn end(self) -> Result<(), Box<dyn Error>> {
         match self {
+            // HtmlRewriter ....so which .end() is taken?
             ProcessorImpl::LazyLoading(p) => p.end().map_err(Into::into),
+            // so p is Escaper and end() is ...
             ProcessorImpl::HtmlEscape(p) => p.end(),
         }
     }
